@@ -6,27 +6,31 @@ import com.qcmplatform.service.interfaces.EmailServiceI;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailServiceImpl implements EmailServiceI {
 
-    private final JavaMailSender mailSender;
+    private final RestTemplate restTemplate;
+
+    @Value("${app.brevo.api-key}")
+    private String brevoApiKey;
 
     @Value("${spring.mail.username}")
     private String expediteur;
 
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
+
+    private static final String BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
     @Async
     @Override
@@ -40,16 +44,20 @@ public class EmailServiceImpl implements EmailServiceI {
         }
     }
 
-    private void envoyerEmail(User etudiant, Evaluation evaluation, String enseignantNom) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+    private void envoyerEmail(User etudiant, Evaluation evaluation, String enseignantNom) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", brevoApiKey);
 
-        helper.setFrom(expediteur);
-        helper.setTo(etudiant.getEmail());
-        helper.setSubject("📝 Nouveau test disponible : " + evaluation.getTitre());
-        helper.setText(construireCorps(etudiant, evaluation, enseignantNom), true);
+        Map<String, Object> body = Map.of(
+            "sender", Map.of("name", "QCM Platform", "email", expediteur),
+            "to", List.of(Map.of("email", etudiant.getEmail(), "name", etudiant.getPrenom())),
+            "subject", "📝 Nouveau test disponible : " + evaluation.getTitre(),
+            "htmlContent", construireCorps(etudiant, evaluation, enseignantNom)
+        );
 
-        mailSender.send(message);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        restTemplate.exchange(BREVO_URL, HttpMethod.POST, entity, String.class);
         log.info("Email envoyé à {}", etudiant.getEmail());
     }
 

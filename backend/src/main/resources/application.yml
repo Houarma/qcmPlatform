@@ -40,3 +40,5 @@ app:
     url: ${ML_SERVICE_URL:http://localhost:8000}
   frontend:
     url: ${FRONTEND_URL:http://localhost:3000}
+  brevo:
+    api-key: ${BREVO_API_KEY}
