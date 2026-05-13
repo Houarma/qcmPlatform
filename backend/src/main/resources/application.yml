@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/qcmdb}
+    username: ${SPRING_DATASOURCE_USERNAME:qcmuser}
+    password: ${SPRING_DATASOURCE_PASSWORD:qcmpassword}
+    driver-class-name: org.postgresql.Driver
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+app:
+  firebase:
+    project-id: ${FIREBASE_PROJECT_ID}
+  ml-service:
+    url: ${ML_SERVICE_URL:http://localhost:8000}
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:3000}

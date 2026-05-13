@@ -1,0 +1,25 @@
+# Environment
+.env
+*.env.local
+
+# Java
+backend/target/
+*.class
+*.jar
+
+# Node
+frontend/node_modules/
+frontend/.next/
+
+# Python
+ml-service/__pycache__/
+ml-service/*.pyc
+ml-service/.venv/
+
+# Docker
+postgres_data/
+
+# IDE
+.idea/
+.vscode/
+*.iml
