@@ -51,8 +51,15 @@ export default function CreerEvaluationPage() {
       })
       toast.success('Évaluation générée avec succès !')
       router.push(`/enseignant/evaluations/${data.id}`)
-    } catch {
-      toast.error('Erreur lors de la génération. Vérifiez le service ML.')
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 403) {
+        toast.error('Accès refusé. Votre compte n\'a pas le rôle ENSEIGNANT.')
+      } else if (status === 503 || status === 500) {
+        toast.error('Le service de génération IA est indisponible. Réessayez dans quelques secondes.')
+      } else {
+        toast.error('Erreur lors de la génération. Vérifiez votre connexion.')
+      }
     } finally {
       setLoading(false)
     }
