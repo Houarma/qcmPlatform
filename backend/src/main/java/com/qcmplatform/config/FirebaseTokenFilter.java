@@ -41,14 +41,14 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
         try {
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
             String uid = decodedToken.getUid();
-            logger.info("[AUTH] Token vérifié pour UID: {}", uid);
+            logger.info("[AUTH] Token vérifié pour UID: " + uid);
 
             var found = userRepository.findByFirebaseUid(uid);
             if (found.isEmpty()) {
-                logger.warn("[AUTH] Aucun utilisateur trouvé en DB pour UID: {}", uid);
+                logger.warn("[AUTH] Aucun utilisateur trouvé en DB pour UID: " + uid);
             } else {
                 var user = found.get();
-                logger.info("[AUTH] Utilisateur trouvé: {} | rôle: {}", user.getEmail(), user.getRole());
+                logger.info("[AUTH] Utilisateur trouvé: " + user.getEmail() + " | rôle: " + user.getRole());
                 var auth = new UsernamePasswordAuthenticationToken(
                         user,
                         null,
@@ -58,7 +58,7 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
             }
 
         } catch (FirebaseAuthException e) {
-            logger.error("[AUTH] Token Firebase invalide: {}", e.getMessage());
+            logger.error("[AUTH] Token Firebase invalide: " + e.getMessage());
         }
 
         chain.doFilter(request, response);
