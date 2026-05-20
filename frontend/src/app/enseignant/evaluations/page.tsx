@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import api from '@/services/api.service'
+import { useMesEvaluations } from '@/hooks/useEvaluations'
 import { Evaluation } from '@/types'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -11,14 +10,7 @@ import Spinner from '@/components/ui/Spinner'
 import { Plus, BookOpen, BarChart2, ChevronRight } from 'lucide-react'
 
 export default function EvaluationsPage() {
-  const [evaluations, setEvaluations] = useState<Evaluation[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    api.get<Evaluation[]>('/api/evaluations/mes-evaluations')
-      .then(r => setEvaluations(r.data))
-      .finally(() => setLoading(false))
-  }, [])
+  const { data: evaluations = [], isLoading } = useMesEvaluations()
 
   const statutBadge = (s: string) =>
     s === 'PUBLIEE' ? 'success' : s === 'ARCHIVEE' ? 'danger' : 'warning'
@@ -35,7 +27,7 @@ export default function EvaluationsPage() {
         </Link>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>
       ) : evaluations.length === 0 ? (
         <Card>
@@ -47,7 +39,7 @@ export default function EvaluationsPage() {
         </Card>
       ) : (
         <div className="flex flex-col gap-3">
-          {evaluations.map(e => (
+          {evaluations.map((e: Evaluation) => (
             <Card key={e.id} className="hover:shadow-md transition-shadow">
               <div className="px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex-1 min-w-0">

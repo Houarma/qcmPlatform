@@ -1,29 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import api from '@/services/api.service'
-import { Evaluation } from '@/types'
+import { useEvaluationsPubliees } from '@/hooks/useEvaluations'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { BookOpen, ChevronRight } from 'lucide-react'
 
 export default function TestsPage() {
-  const [tests, setTests] = useState<Evaluation[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    api.get<Evaluation[]>('/api/evaluations')
-      .then(r => setTests(r.data))
-      .finally(() => setLoading(false))
-  }, [])
+  const { data: tests = [], isLoading } = useEvaluationsPubliees()
 
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-6">
       <h1 className="text-2xl font-bold text-gray-900">Tests disponibles</h1>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>
       ) : tests.length === 0 ? (
         <Card>

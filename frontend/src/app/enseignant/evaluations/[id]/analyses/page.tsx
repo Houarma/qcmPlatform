@@ -1,34 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import api from '@/services/api.service'
-import { AnalyseResponse } from '@/types'
+import { useAnalyse } from '@/hooks/useAnalyse'
 import Card, { CardBody, CardHeader } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { ArrowLeft, Users, TrendingUp, AlertTriangle } from 'lucide-react'
-import toast from 'react-hot-toast'
 
 export default function AnalysesPage() {
   const { id } = useParams<{ id: string }>()
-  const [analyse, setAnalyse] = useState<AnalyseResponse | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: analyse, isLoading, isError } = useAnalyse(id)
 
-  useEffect(() => {
-    api.get<AnalyseResponse>(`/api/analyses/${id}`)
-      .then(r => setAnalyse(r.data))
-      .catch(() => toast.error('Pas assez de données pour générer une analyse'))
-      .finally(() => setLoading(false))
-  }, [id])
-
-  if (loading) {
+  if (isLoading) {
     return <div className="flex justify-center py-20"><Spinner size="lg" /></div>
   }
 
-  if (!analyse) {
+  if (isError || !analyse) {
     return (
       <div className="p-4 sm:p-6 text-center py-20 text-slate-400 max-w-md mx-auto">
         <AlertTriangle className="h-12 w-12 mx-auto mb-3 opacity-40" />

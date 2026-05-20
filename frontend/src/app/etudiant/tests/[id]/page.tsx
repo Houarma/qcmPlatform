@@ -1,41 +1,31 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import api from '@/services/api.service'
-import { Evaluation } from '@/types'
+import { useEvaluation } from '@/hooks/useEvaluations'
+import { useMesResultats, useSubmitResultat } from '@/hooks/useResultats'
 import Card, { CardBody, CardHeader } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { ArrowLeft, CheckCircle, Send } from 'lucide-react'
-import { Resultat } from '@/types'
 
 const LABELS = ['A', 'B', 'C', 'D']
 
 export default function PasserTestPage() {
   const { id } = useParams<{ id: string }>()
-  const router = useRouter()
-  const [evaluation, setEvaluation] = useState<Evaluation | null>(null)
-  const [loading, setLoading] = useState(true)
   const [reponses, setReponses] = useState<Record<number, string>>({})
-  const [submitting, setSubmitting] = useState(false)
-  const [score, setScore] = useState<number | null>(null)
+  const [scoreLocal, setScoreLocal] = useState<number | null>(null)
 
-  useEffect(() => {
-    Promise.all([
-      api.get<Evaluation>(`/api/evaluations/${id}`),
-      api.get<Resultat[]>('/api/resultats/mes-resultats').catch(() => ({ data: [] as Resultat[] })),
-    ])
-      .then(([evalRes, resultatsRes]) => {
-        setEvaluation(evalRes.data)
-        const existing = resultatsRes.data.find(r => r.evaluationId === Number(id))
-        if (existing) setScore(existing.score)
-      })
-      .catch(() => toast.error('Test introuvable'))
-      .finally(() => setLoading(false))
-  }, [id])
+  const { data: evaluation, isLoading: loadingEval } = useEvaluation(id)
+  const { data: resultats = [], isLoading: loadingResultats } = useMesResultats()
+  const submitResultat = useSubmitResultat()
+
+  const isLoading = loadingEval || loadingResultats
+
+  const existingResult = resultats.find(r => r.evaluationId === Number(id))
+  const score = scoreLocal ?? existingResult?.score ?? null
 
   function selectReponse(questionId: number, label: string) {
     setReponses(r => ({ ...r, [questionId]: label }))
@@ -48,22 +38,19 @@ export default function PasserTestPage() {
       toast.error(`Répondez à toutes les questions (${nbRepondu}/${evaluation.questions.length})`)
       return
     }
-    setSubmitting(true)
     try {
-      const { data } = await api.post('/api/resultats', {
+      const result = await submitResultat.mutateAsync({
         evaluationId: evaluation.id,
         reponses,
       })
-      setScore(data.score)
-      toast.success(`Test soumis ! Score : ${data.score.toFixed(0)}%`)
+      setScoreLocal(result.score)
+      toast.success(`Test soumis ! Score : ${result.score.toFixed(0)}%`)
     } catch {
       toast.error('Erreur lors de la soumission')
-    } finally {
-      setSubmitting(false)
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return <div className="flex justify-center py-20"><Spinner size="lg" /></div>
   }
 
@@ -171,7 +158,7 @@ export default function PasserTestPage() {
         <div className="flex justify-end pb-6">
           <Button
             onClick={handleSubmit}
-            loading={submitting}
+            loading={submitResultat.isPending}
             size="lg"
             disabled={answered < total}
           >

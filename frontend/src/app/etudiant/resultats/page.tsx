@@ -1,22 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import api from '@/services/api.service'
-import { Resultat } from '@/types'
+import { useMesResultats } from '@/hooks/useResultats'
 import Card, { CardBody } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Spinner from '@/components/ui/Spinner'
 import { Trophy, TrendingUp } from 'lucide-react'
 
 export default function ResultatsPage() {
-  const [resultats, setResultats] = useState<Resultat[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    api.get<Resultat[]>('/api/resultats/mes-resultats')
-      .then(r => setResultats(r.data))
-      .finally(() => setLoading(false))
-  }, [])
+  const { data: resultats = [], isLoading } = useMesResultats()
 
   const avg = resultats.length
     ? (resultats.reduce((s, r) => s + r.score, 0) / resultats.length).toFixed(1)
@@ -37,7 +28,7 @@ export default function ResultatsPage() {
         )}
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>
       ) : resultats.length === 0 ? (
         <Card>

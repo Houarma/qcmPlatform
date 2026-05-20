@@ -1,13 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BookOpen, Trophy, ClipboardList, Star, ChevronRight, Zap, TrendingUp } from 'lucide-react'
-import api from '@/services/api.service'
+import { useEvaluationsPubliees } from '@/hooks/useEvaluations'
+import { useMesResultats } from '@/hooks/useResultats'
 import { DashboardGreeting } from '@/components/dashboard/DashboardGreeting'
 import { PillBarChart } from '@/components/dashboard/PillBarChart'
 import { GaugeChart } from '@/components/dashboard/GaugeChart'
-import type { Evaluation, Resultat } from '@/types'
 
 const DECO = [40, 62, 35, 55, 45, 70, 38]
 
@@ -39,19 +38,9 @@ function ContentSkeleton() {
 }
 
 export default function EtudiantDashboard() {
-  const [tests, setTests]       = useState<Evaluation[]>([])
-  const [resultats, setResultats] = useState<Resultat[]>([])
-  const [loading, setLoading]   = useState(true)
-
-  useEffect(() => {
-    Promise.all([
-      api.get<Evaluation[]>('/api/evaluations'),
-      api.get<Resultat[]>('/api/resultats/mes-resultats'),
-    ]).then(([testsRes, resultatsRes]) => {
-      setTests(testsRes.data)
-      setResultats(resultatsRes.data)
-    }).finally(() => setLoading(false))
-  }, [])
+  const { data: tests = [], isLoading: loadingTests } = useEvaluationsPubliees()
+  const { data: resultats = [], isLoading: loadingResultats } = useMesResultats()
+  const isLoading = loadingTests || loadingResultats
 
   const avg  = resultats.length ? resultats.reduce((s, r) => s + r.score, 0) / resultats.length : null
   const best = resultats.length ? Math.max(...resultats.map(r => r.score)) : null
@@ -85,7 +74,7 @@ export default function EtudiantDashboard() {
         </Link>
       </div>
 
-      {loading ? <ContentSkeleton /> : (
+      {isLoading ? <ContentSkeleton /> : (
         <>
           {/* ── Stat cards ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -189,7 +178,7 @@ export default function EtudiantDashboard() {
                 ) : (
                   <>
                     <h3 className="text-base font-bold leading-snug mb-1">Aucun test disponible</h3>
-                    <p className="text-xs text-violet-300">Vos enseignants n'ont pas encore publié de tests</p>
+                    <p className="text-xs text-violet-300">Vos enseignants n&apos;ont pas encore publié de tests</p>
                   </>
                 )}
               </div>

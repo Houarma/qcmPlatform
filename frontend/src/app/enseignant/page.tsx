@@ -1,13 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Plus, FileText, CheckCircle2, Edit3, BookOpen, BarChart2, TrendingUp } from 'lucide-react'
-import api from '@/services/api.service'
+import { useMesEvaluations } from '@/hooks/useEvaluations'
 import { DashboardGreeting } from '@/components/dashboard/DashboardGreeting'
 import { PillBarChart } from '@/components/dashboard/PillBarChart'
 import { GaugeChart } from '@/components/dashboard/GaugeChart'
-import type { Evaluation } from '@/types'
 
 const DECO = [45, 68, 32, 58, 40, 72, 50]
 
@@ -39,14 +37,7 @@ function ContentSkeleton() {
 }
 
 export default function EnseignantDashboard() {
-  const [evaluations, setEvaluations] = useState<Evaluation[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    api.get<Evaluation[]>('/api/evaluations/mes-evaluations')
-      .then(r => setEvaluations(r.data))
-      .finally(() => setLoading(false))
-  }, [])
+  const { data: evaluations = [], isLoading } = useMesEvaluations()
 
   const publiees       = evaluations.filter(e => e.statut === 'PUBLIEE').length
   const brouillons     = evaluations.filter(e => e.statut === 'BROUILLON').length
@@ -87,7 +78,7 @@ export default function EnseignantDashboard() {
         </div>
       </div>
 
-      {loading ? <ContentSkeleton /> : (
+      {isLoading ? <ContentSkeleton /> : (
         <>
           {/* ── Stat cards ── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

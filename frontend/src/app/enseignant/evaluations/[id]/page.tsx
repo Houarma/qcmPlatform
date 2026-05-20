@@ -1,11 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import api from '@/services/api.service'
-import { Evaluation } from '@/types'
+import { useEvaluation, usePublierEvaluation } from '@/hooks/useEvaluations'
 import Card, { CardBody, CardHeader } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
@@ -15,27 +13,15 @@ import { ArrowLeft, CheckCircle, BarChart2 } from 'lucide-react'
 export default function EvaluationDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const [evaluation, setEvaluation] = useState<Evaluation | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [publishing, setPublishing] = useState(false)
-
-  useEffect(() => {
-    api.get<Evaluation>(`/api/evaluations/${id}`)
-      .then(r => setEvaluation(r.data))
-      .catch(() => toast.error('Évaluation introuvable'))
-      .finally(() => setLoading(false))
-  }, [id])
+  const { data: evaluation, isLoading } = useEvaluation(id)
+  const publier = usePublierEvaluation(id)
 
   async function handlePublier() {
-    setPublishing(true)
     try {
-      const { data } = await api.post(`/api/evaluations/${id}/publier`)
-      setEvaluation(data)
+      await publier.mutateAsync()
       toast.success('Évaluation publiée ! Les étudiants peuvent maintenant y accéder.')
     } catch {
       toast.error('Erreur lors de la publication')
-    } finally {
-      setPublishing(false)
     }
   }
 
@@ -44,7 +30,7 @@ export default function EvaluationDetailPage() {
 
   const labels = ['A', 'B', 'C', 'D']
 
-  if (loading) {
+  if (isLoading) {
     return <div className="flex justify-center py-20"><Spinner size="lg" /></div>
   }
 
@@ -82,7 +68,7 @@ export default function EvaluationDetailPage() {
               </Link>
             )}
             {evaluation.statut === 'BROUILLON' && (
-              <Button onClick={handlePublier} loading={publishing} size="sm">
+              <Button onClick={handlePublier} loading={publier.isPending} size="sm">
                 <CheckCircle className="h-4 w-4" />
                 Publier
               </Button>
