@@ -16,7 +16,8 @@ from django.conf import settings
 
 
 def index(request):
-    return render(request, 'slides/index.html')
+    missing_keys = not settings.GROQ_API_KEY or not settings.DB_URL
+    return render(request, 'slides/index.html', {'missing_keys': missing_keys})
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────

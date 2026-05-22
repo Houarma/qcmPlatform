@@ -13,6 +13,46 @@
 }
 html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Space Grotesk',sans-serif}
 
+/* ── Modale d'accueil ── */
+#welcome-modal{
+  position:fixed;inset:0;z-index:999;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
+}
+#welcome-modal.hidden{display:none}
+#welcome-card{
+  background:#0e0e16;border:1px solid #1e1e30;
+  border-radius:16px;padding:40px 44px;max-width:520px;width:90%;
+  box-shadow:0 0 60px rgba(79,70,229,0.15);
+}
+#welcome-card h2{font-size:20px;font-weight:700;color:#fff;margin-bottom:6px}
+#welcome-card .subtitle{font-size:13px;color:#6b6b85;margin-bottom:24px}
+#welcome-card .ok-line{
+  font-size:13px;color:#a3e635;background:#0a1a00;
+  border:1px solid #1a3a00;border-radius:8px;
+  padding:10px 14px;margin-bottom:20px;
+}
+#welcome-card .features{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+#welcome-card .feature{
+  display:flex;align-items:center;gap:10px;
+  background:#13131f;border:1px solid #1e1e30;
+  border-radius:8px;padding:10px 14px;font-size:13px;color:#c7d2fe;
+}
+#welcome-card .feature span.icon{font-size:16px}
+#welcome-card .contact{
+  font-size:12px;color:#6b6b85;margin-bottom:24px;
+  border-top:1px solid #1e1e30;padding-top:16px;
+}
+#welcome-card .contact a{color:#818cf8;text-decoration:none;font-weight:600}
+#welcome-card .contact a:hover{text-decoration:underline}
+#welcome-card button{
+  width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;
+  background:#4f46e5;color:#fff;font-size:14px;font-weight:700;
+  font-family:'Space Grotesk',sans-serif;
+  transition:background 0.2s;
+}
+#welcome-card button:hover{background:#6366f1}
+
 /* ── Slide container ── */
 #deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
 .slide{
@@ -111,6 +151,31 @@ img{display:block;max-width:100%;border-radius:10px}
 </style>
 </head>
 <body>
+
+{% if missing_keys %}
+<div id="welcome-modal">
+  <div id="welcome-card">
+    <h2>Avant de commencer</h2>
+    <p class="subtitle">Bienvenue sur la présentation de la QCM Platform.</p>
+    <div class="ok-line">
+      ✓ Les 17 slides et le diagramme d'architecture fonctionnent sans configuration particulière.
+    </div>
+    <p style="font-size:13px;color:#6b6b85;margin-bottom:12px">Deux fonctionnalités sont connectées à nos services cloud en direct :</p>
+    <div class="features">
+      <div class="feature"><span class="icon">📊</span> Statistiques en temps réel (étudiants, évaluations, scores)</div>
+      <div class="feature"><span class="icon">⚡</span> Démonstration IA — génération de QCM en direct</div>
+    </div>
+    <div class="contact">
+      Pour les activer, contactez-nous et nous vous transmettrons les accès :<br/>
+      <a href="mailto:ouarmahaphiz02@gmail.com">ouarmahaphiz02@gmail.com</a>
+    </div>
+    <button onclick="document.getElementById('welcome-modal').classList.add('hidden')">
+      Commencer la présentation &rarr;
+    </button>
+  </div>
+</div>
+{% endif %}
+
 <div id="progress"></div>
 <div id="deck">
 
