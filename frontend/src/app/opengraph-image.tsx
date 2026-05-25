@@ -1,10 +1,15 @@
 import { ImageResponse } from 'next/og'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 export const alt = 'QCM Platform — Plateforme intelligente de QCM par IA'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 export default function Image() {
+  const logoData = readFileSync(join(process.cwd(), 'public', 'logo.png'))
+  const logoSrc = `data:image/png;base64,${logoData.toString('base64')}`
+
   return new ImageResponse(
     (
       <div
@@ -19,7 +24,7 @@ export default function Image() {
           padding: '60px',
         }}
       >
-        {/* Glow background */}
+        {/* Glow */}
         <div style={{
           position: 'absolute',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -27,26 +32,14 @@ export default function Image() {
           background: 'radial-gradient(ellipse at 50% 0%, #4f46e520 0%, transparent 70%)',
         }} />
 
-        {/* Logo square */}
-        <div style={{
-          width: 110,
-          height: 110,
-          background: '#7c3aed',
-          borderRadius: 26,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 32,
-          boxShadow: '0 0 40px #7c3aed60',
-        }}>
-          <div style={{
-            color: 'white',
-            fontSize: 64,
-            fontWeight: 900,
-            lineHeight: 1,
-            display: 'flex',
-          }}>Q</div>
-        </div>
+        {/* Logo réel */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoSrc}
+          width={110}
+          height={110}
+          style={{ marginBottom: 32, borderRadius: 24 }}
+        />
 
         {/* Title */}
         <div style={{

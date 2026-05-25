@@ -26,6 +26,11 @@ export const metadata: Metadata = {
     title: 'QCM Platform — Évaluations intelligentes par IA',
     description: 'Créez des QCM en quelques secondes grâce à l\'IA, faites passer des tests à vos étudiants et analysez automatiquement leurs résultats.',
   },
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
+    shortcut: '/icon.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
